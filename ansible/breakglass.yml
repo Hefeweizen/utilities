@@ -1,0 +1,26 @@
+#!/usr/bin/ansible-playbook -i /tmp/inventory -e group=foo --tags=revoke breakglass.yml
+
+# A small p.o.c. script
+# The client expressed a need to, in an emergency situation, to allow devs
+# into the prod environment.
+---
+- hosts: webservers
+  become: yes
+  vars:
+    group: admin
+
+  tasks:
+    - name: Add sudo config for named group
+      tags:
+        - allow
+      copy:
+        content: "{{ group }} ALL=NOPASSWD: ALL"
+        dest: /etc/sudoers.d/{{ group }}.breakglass
+        validate: 'visudo -cf %s'
+
+    - name: Clean up access
+      tags:
+        - revoke
+      file:
+        dest: /etc/sudoers.d/{{ group }}.breakglass
+        state: absent
