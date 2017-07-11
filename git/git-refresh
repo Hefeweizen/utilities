@@ -45,32 +45,35 @@ git_pull() {
     git --work-tree=${target} --git-dir=${target}/.git pull >/dev/null 2>&1
 }
 
+update_repo() {
+    local repo_path=$1
+
+    repo_has_remotes $repo_path || return 0
+
+    fetch_output=$(git_fetch ${repo_path})
+
+    if [[ "$fetch_output" != "" ]]
+    then
+        # found something to fetch
+        echo "Processing ${repo}:"
+        echo "${fetch_output}"
+
+        if $(on_branch_master ${repo_path})
+        then
+            # try to update master
+            $(git_pull ${repo_path}) &
+        fi
+    fi
+}
+
 main() {
     local base_dir=$1
     local repo
-    local repo_path
     local fetch_output
 
     for repo in $(find_repos ${base_dir})
     do
-        repo_path="${base_dir}/${repo}"
-
-        repo_has_remotes $repo_path || continue
-
-        fetch_output=$(git_fetch ${repo_path})
-
-        if [[ "$fetch_output" != "" ]]
-        then
-            # found something to fetch
-            echo "Processing ${repo}:"
-            echo "${fetch_output}"
-
-            if $(on_branch_master ${repo_path})
-            then
-                # try to update master
-                $(git_pull ${repo_path}) &
-            fi
-        fi
+        update_repo "${base_dir}/${repo}"
     done
 }
 
