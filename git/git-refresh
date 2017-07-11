@@ -4,8 +4,6 @@
 # to see it and, and thus, you'll be able to do `git refresh`.
 #
 # TODO: it'd be nice to replace the for with a parallel call
-# TODO: to effect the above, would need to be able on non-local repos
-#         i.e. set: --work-tree={repo} --git-dir={repo}/.git
 #
 
 #set -x
@@ -30,40 +28,55 @@ find_repos() {
 on_branch_master() {
     local target=$1
 
-    grep '^ref: refs/heads/master$' $1/.git/HEAD > /dev/null 2>&1
+    grep '^ref: refs/heads/master$' ${target}/.git/HEAD > /dev/null 2>&1
 
     [[ $? -eq 0 ]]
+}
+
+git_fetch() {
+    local target=$1
+
+    git --work-tree=${target} --git-dir=${target}/.git fetch 2>&1
+}
+
+git_pull() {
+    local target=$1
+
+    git --work-tree=${target} --git-dir=${target}/.git pull >/dev/null 2>&1
+}
+
+update_repo() {
+    local repo_path=$1
+
+    repo_has_remotes $repo_path || return 0
+
+    fetch_output=$(git_fetch ${repo_path})
+
+    if [[ "$fetch_output" != "" ]]
+    then
+        # found something to fetch
+        echo "Processing ${repo}:"
+        echo "${fetch_output}"
+
+        if $(on_branch_master ${repo_path})
+        then
+            # try to update master
+            $(git_pull ${repo_path}) &
+        fi
+    fi
 }
 
 main() {
     local base_dir=$1
     local repo
-    local repo_path
     local fetch_output
+    local num_jobs=10
 
-    for repo in $(find_repos ${base_dir})
-    do
-        repo_path="${base_dir}/${repo}"
+    # export all previously defined functions so as to allow parallel to see them
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
 
-        repo_has_remotes $repo_path || continue
-
-        cd ${repo_path}
-
-        fetch_output=$(git fetch 2>&1)
-
-        if [[ "$fetch_output" != "" ]]
-        then
-            # found something to fetch
-            echo "Processing ${repo}:"
-            echo "${fetch_output}"
-
-            if $(on_branch_master ${repo_path})
-            then
-                # try to update master
-                git pull >/dev/null 2>&1 &
-            fi
-        fi
-    done
+    find_repos ${base_dir} | \
+        parallel --jobs ${num_jobs} update_repo ${base_dir}/{}
 }
 
 main ${1:-~/Workspace}
