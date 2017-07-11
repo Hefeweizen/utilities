@@ -70,11 +70,13 @@ main() {
     local base_dir=$1
     local repo
     local fetch_output
+    local num_jobs=10
 
-    for repo in $(find_repos ${base_dir})
-    do
-        update_repo "${base_dir}/${repo}"
-    done
+    # export all previously defined functions so as to allow parallel to see them
+    eval "$(declare -F | sed -e 's/-f /-fx /')"
+
+    find_repos ${base_dir} | \
+        parallel --jobs ${num_jobs} update_repo ${base_dir}/{}
 }
 
 main ${1:-~/Workspace}
