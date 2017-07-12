@@ -57,7 +57,7 @@ update_repo() {
     if [[ "$fetch_output" != "" ]]
     then
         # found something to fetch
-        echo "Processing ${repo}:"
+        echo "Processing ${repo_path}:"
         echo "${fetch_output}"
 
         if $(on_branch_master ${repo_path})
@@ -70,7 +70,6 @@ update_repo() {
 
 main() {
     local base_dir=$1
-    local repo
     local fetch_output
     local num_jobs=10
 
