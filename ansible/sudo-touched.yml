@@ -1,0 +1,18 @@
+# USAGE:
+# /usr/local/bin/ansible-playbook -K -i <(<<<"localhost") ansible/sudo-touched.yml
+
+# configures a mac to use touch-id authorization for sudo
+---
+- hosts: localhost
+  connection: local
+  become: yes
+
+  tasks:
+    - name: Configure touch_id in pam to authorize sudo
+      tags:
+        - enable
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/sudo
+        regexp: 'pam_tid.so$'
+        insertafter: '^# sudo:'
+        line: 'auth       sufficient     pam_tid.so'
