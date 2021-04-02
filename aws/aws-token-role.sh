@@ -1,14 +1,11 @@
 #!/bin/bash
 #
-# Sample for getting temp session token from AWS STS
+# Authenticate to AWS with MFA, then assume role
 #
-# aws --profile youriamuser sts get-session-token --duration 3600 \
-# --serial-number arn:aws:iam::012345678901:mfa/user --token-code 012345
-#
-# Based on : https://github.com/EvidentSecurity/MFAonCLI/blob/master/aws-temp-token.sh
-# Scraped from: https://gist.github.com/ogavrisevs/2debdcb96d3002a9cbf2
+# based on inital script from: https://gist.github.com/ogavrisevs/2debdcb96d3002a9cbf2
 #
 
+# check that aws cli is installed
 AWS_CLI=`which aws`
 
 if [ $? -ne 0 ]; then
@@ -35,42 +32,30 @@ ROLE_ARN=${2:-$DEFAULT_ROLE_ARN}
 DURATION=43200 # 12 hours
 SESSION_NAME=$(hostname)
 
-echo "AWS-CLI Profile: $AWS_CLI_PROFILE"
 echo "MFA ARN: $ARN_OF_MFA"
 echo "MFA Token Code: $MFA_TOKEN_CODE"
 # set -x
 
+# First, auth with MFA device, gaining session token
 read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< \
 $( aws --profile $AWS_USER_PROFILE sts get-session-token \
   --duration $DURATION  \
   --serial-number $ARN_OF_MFA \
   --token-code $MFA_TOKEN_CODE \
-  --output text  | awk '{ print $2, $4, $5 }')
+  --output json  | \
+  jq -r '.Credentials | "\(.AccessKeyId) \(.SecretAccessKey) \(.SessionToken)"')
 
-echo "AWS_ACCESS_KEY_ID: " $AWS_ACCESS_KEY_ID
-echo "AWS_SECRET_ACCESS_KEY: " $AWS_SECRET_ACCESS_KEY
-echo "AWS_SESSION_TOKEN: " $AWS_SESSION_TOKEN
+# push these temp creds into environment for subsequent assume-role
+export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-if [ -z "$AWS_ACCESS_KEY_ID" ]
-then
-  exit 1
-fi
-
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"`
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"`
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_session_token "$AWS_SESSION_TOKEN"`
-
-# MFA Session Established
-# Proceed to assumeRole
-
+# Second, use temp session creds to assume role; will get a "long-lasting" creds
 read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< \
 $( aws sts assume-role \
-  --profile 2auth \
   --role-arn ${ROLE_ARN} \
   --role-session-name ${SESSION_NAME} \
   --output json  | \
   jq -r '.Credentials | "\(.AccessKeyId) \(.SecretAccessKey) \(.SessionToken)"')
 
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"`
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"`
-`aws --profile $AWS_2AUTH_PROFILE configure set aws_session_token "$AWS_SESSION_TOKEN"`
+aws --profile $AWS_2AUTH_PROFILE configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+aws --profile $AWS_2AUTH_PROFILE configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+aws --profile $AWS_2AUTH_PROFILE configure set aws_session_token "$AWS_SESSION_TOKEN"
