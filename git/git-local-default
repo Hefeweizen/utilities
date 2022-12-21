@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# set -x
+
+# Fetch defaults
+git_config_default=$(git config init.defaultBranch)
+git_remote_default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's#^refs/remotes/origin/##')
+git_current_branch=$(git symbolic-ref --short HEAD)
+
+git_branches="$(git br | cut -c 3-)"
+
+branch? () {
+    branch_to_check=$1
+    if [[ ${#branch_to_check} -eq 0 ]]
+    then
+        return 1
+    fi
+
+    grep "${branch_to_check}" <<<"${git_branches}" > /dev/null
+}
+
+# 1st - follow remote branch, if it's known
+if [[ ${#git_remote_default} -ne 0 ]] && branch? ${git_remote_default}
+then
+    echo "${git_remote_default}"
+    exit
+fi
+
+# 2nd - git config default, if it exists
+if [[ ${#git_config_default} -ne 0 ]] && branch? ${git_config_default}
+then
+    echo ${git_config_default}
+    exit
+fi
+
+# 3rd - main
+if branch? "main"
+then
+    echo "main"
+    exit
+fi
+
+# 4th - master
+if branch? "master"
+then
+    echo "master"
+    exit
+fi
