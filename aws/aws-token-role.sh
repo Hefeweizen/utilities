@@ -4,6 +4,9 @@
 #
 # based on inital script from: https://gist.github.com/ogavrisevs/2debdcb96d3002a9cbf2
 #
+# when installing, cp to ~/bin, and then adust user_profile; and arn of mfa.
+# Also make sure default_role_arn includes account number
+#
 
 # check that aws cli is installed
 AWS_CLI=`which aws`
