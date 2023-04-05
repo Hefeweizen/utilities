@@ -5,7 +5,6 @@
 # Fetch defaults
 git_config_default=$(git config init.defaultBranch)
 git_remote_default=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's#^refs/remotes/origin/##')
-git_current_branch=$(git symbolic-ref --short HEAD)
 
 git_branches="$(git br | cut -c 3-)"
 
