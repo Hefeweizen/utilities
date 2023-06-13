@@ -1,0 +1,12 @@
+#!/bin/bash
+# git wip - make a wip commit to capture intermediate changes
+
+current_branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+if git rev-parse --verify ${current_branch_name}-wip >/dev/null 2>&1; then
+    git branch --delete --force ${current_branch_name}-wip >/dev/null
+fi 
+git checkout -b ${current_branch_name}-wip >/dev/null 2>&1
+git commit --all -m "wip" >/dev/null
+git checkout @{-1} >/dev/null 2>&1
+git apply <(git show -u ${current_branch_name}-wip) >/dev/null
