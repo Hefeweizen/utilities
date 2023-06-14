@@ -9,4 +9,4 @@ fi
 git checkout -b ${current_branch_name}-wip >/dev/null 2>&1
 git commit --all -m "wip" >/dev/null
 git checkout @{-1} >/dev/null 2>&1
-git apply <(git show -u ${current_branch_name}-wip) >/dev/null
+git restore --worktree --source=${current_branch_name}-wip -- .
