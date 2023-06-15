@@ -1,6 +1,19 @@
 #!/bin/bash
 # git wip - make a wip commit to capture intermediate changes
 
+
+# if env var found, then abort saving wip
+#
+# This was specifically added to have git not interfere
+# with --interactive patching/rebasing.
+# ```
+# $ g config core.editor
+# NO_GIT_WIP=1 vim
+# ```
+if [[ ${NO_GIT_WIP} -eq 1 ]]; then
+    exit
+fi
+
 current_branch_name=$(git rev-parse --abbrev-ref HEAD)
 
 if git rev-parse --verify ${current_branch_name}-wip >/dev/null 2>&1; then

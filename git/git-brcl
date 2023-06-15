@@ -19,4 +19,3 @@ fi
 if git rev-parse --verify ${github_source}/${target_branch_name} >/dev/null 2>&1; then
     git push ${github_source} --delete ${target_branch_name}
 fi
-
