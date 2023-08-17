@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 # in a list, move arg to first position, preserving order
 #
 # The description above is the effect.  The implementation

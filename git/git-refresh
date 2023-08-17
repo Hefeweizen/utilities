@@ -1,5 +1,8 @@
 #!/bin/bash
-#
+
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 # Having this anywhere in your $PATH (~/bin is recommended) will allow git to
 # to see it and, and thus, you'll be able to do `git refresh`.
 #

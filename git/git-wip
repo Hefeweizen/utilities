@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 # git wip - make a wip commit to capture intermediate changes
 
 

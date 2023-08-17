@@ -1,4 +1,8 @@
 #! /bin/sh
+
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 #
 # USAGE:
 #

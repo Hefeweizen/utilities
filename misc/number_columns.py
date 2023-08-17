@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 """
 A simple utility to number the word positions in a line.  Often with `awk` I'll
 want to print a specific column, this utility numbers the columns so as to

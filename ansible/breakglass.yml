@@ -1,3 +1,6 @@
+# Copyright (C) 2023 Hefeweizen (https://github.com/Hefeweizen)
+# Permission to copy and modify is granted under the Apace License 2.0
+
 #!/usr/bin/ansible-playbook -i /tmp/inventory -e group=foo --tags=revoke breakglass.yml
 
 # A small p.o.c. script
