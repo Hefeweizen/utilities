@@ -19,11 +19,11 @@ if [[ ${NO_GIT_WIP} -eq 1 ]]; then
 fi
 
 current_branch_name=$(git rev-parse --abbrev-ref HEAD)
+wip_branch="${current_branch_name}-wip"
 
-if git rev-parse --verify ${current_branch_name}-wip >/dev/null 2>&1; then
-    git branch --delete --force ${current_branch_name}-wip >/dev/null
-fi 
-git checkout -b ${current_branch_name}-wip >/dev/null 2>&1
-git commit --all -m "wip" >/dev/null
-git checkout @{-1} >/dev/null 2>&1
-git restore --worktree --source=${current_branch_name}-wip -- .
+if git rev-parse --verify "${wip_branch}" >/dev/null 2>&1; then
+    git branch --delete --force "${wip_branch}" >/dev/null
+fi
+git stash store "$(git stash create)" -m "${wip_branch} from git-wip" # though the message is unlikely to ever be seen
+git branch "${wip_branch}" "stash@{0}" > /dev/null
+git stash drop --quiet
