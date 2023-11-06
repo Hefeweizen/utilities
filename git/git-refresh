@@ -14,6 +14,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+PARALLEL_BIN=/opt/homebrew/Cellar/parallel/20230822/bin/parallel
+
 repo_has_remotes() {
     local target=$1
     local remotes_found
@@ -80,7 +82,7 @@ main() {
     eval "$(declare -F | sed -e 's/-f /-fx /')"
 
     find_repos ${base_dir} | \
-        parallel --jobs ${num_jobs} update_repo ${base_dir}/{}
+        $PARALLEL_BIN --jobs ${num_jobs} update_repo ${base_dir}/{}
 }
 
 main ${1:-~/Workspace}
