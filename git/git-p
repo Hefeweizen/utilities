@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# This started as a simple alias, but got loaded down with functionality.
+# We do a couple of things:
+# 1.  Don't allow a push if working tree is not clean (i.e. uncommited files)
+# 1.  Don't push to main/master
+
+# set -x
+
+warning='You are on master/main; if you really want to do this type it out long-wise';
+
+function current_branch() {
+    git symbolic-ref --short HEAD
+}
+
+function is_git_clean() {
+    git status --porcelain=v1 2>/dev/null | wc -l
+}
+
+# check if protected branch
+cb=$(current_branch)
+case $(current_branch) in
+    main)   ;& # fall through; we're the same as master
+    master) echo "${warning}";
+            exit
+            ;;
+esac
+
+# check if uncommitted files
+if [[ $(is_git_clean) -ne 0 ]]; then
+  echo 'push failed; uncommited files';
+  exit
+fi;
+
+git push "$@";
