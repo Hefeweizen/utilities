@@ -19,11 +19,11 @@ if [[ ${NO_GIT_WIP} -eq 1 ]]; then
 fi
 
 current_branch_name=$(git rev-parse --abbrev-ref HEAD)
-wip_branch="${current_branch_name}-wip"
+wip_branch="refs/heads/${current_branch_name}-wip"
 
-if git rev-parse --verify "${wip_branch}" >/dev/null 2>&1; then
-    git branch --delete --force "${wip_branch}" >/dev/null
-fi
 git stash store "$(git stash create)" -m "${wip_branch} from git-wip" # though the message is unlikely to ever be seen
-git branch "${wip_branch}" "stash@{0}" > /dev/null
+
+# updates or creates
+git update-ref "${wip_branch}" "stash@{0}"
+
 git stash drop --quiet
