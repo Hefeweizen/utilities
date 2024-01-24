@@ -15,7 +15,7 @@
 silent 'a+1,'b-1d
 
 " copy md headers to toc body
-silent 'b,$g/^#/co'a
+silent 'b,$g/^#\{2,} /co'a
 silent 'a,'b!tac
 
 " duplicate header text as we'll need a copy for the link
