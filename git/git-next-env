@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# set -x
+
+TARGET_FILE=${1}
+
+PATCH_FILE=$(git format-patch @~1)
+patch -l -p1 ${TARGET_FILE} -V none -i ${PATCH_FILE}
+
+rm ${PATCH_FILE}
