@@ -1,0 +1,4 @@
+#!/opt/homebrew/bin/bash
+
+ALACRITTY_SOCKET=$(lsof -U | awk '/^alacritty.*var\/folders/ {print $NF}' | head -1)
+/$(brew --prefix)/bin/alacritty --socket ${ALACRITTY_SOCKET} msg create-window
