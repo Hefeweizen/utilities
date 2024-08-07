@@ -42,6 +42,13 @@ def parse_args():
         help="the name for the output file, app name and namespace",
     )
 
+    p.add_argument(
+        "-f",
+        "--values-file",
+        dest="vfile",
+        help="Provide an additional values file to be applied after the values.yaml in the local directory",
+    )
+
     return p.parse_args()
 
 
@@ -101,9 +108,12 @@ def helm_dependency_build():
         sys.exit(1)
 
 
-def run_template(use_base=False, use_apiversions=False, out="foo"):
+def run_template(
+    use_base=False, use_apiversions=False, additional_values=None, out="foo"
+):
     base = get_base_values() if use_base else ""
     api_versions = get_api_versions() if use_apiversions else ""
+    add_values = f"--values {additional_values} " if additional_values else ""
 
     helm_template_cmd = (
         "helm template "
@@ -112,7 +122,9 @@ def run_template(use_base=False, use_apiversions=False, out="foo"):
         f"--namespace {out} "
         f"{api_versions} "
         f"{base} "
-        f"--values values.yaml ."
+        f"--values values.yaml "
+        f"{add_values}"
+        "."
     )
 
     try:
@@ -137,7 +149,12 @@ def main():
         sys.exit()
 
     helm_dependency_build()
-    run_template(use_base=args.base, use_apiversions=args.av, out=args.output)
+    run_template(
+        use_base=args.base,
+        use_apiversions=args.av,
+        additional_values=args.vfile,
+        out=args.output,
+    )
 
 
 if __name__ == "__main__":
