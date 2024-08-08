@@ -49,6 +49,13 @@ def parse_args():
         help="Provide an additional values file to be applied after the values.yaml in the local directory",
     )
 
+    p.add_argument(
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Don't run helm, just show what commands would be run.",
+    )
+
     return p.parse_args()
 
 
@@ -109,7 +116,11 @@ def helm_dependency_build():
 
 
 def run_template(
-    use_base=False, use_apiversions=False, additional_values=None, out="foo"
+    use_base=False,
+    use_apiversions=False,
+    additional_values=None,
+    dry_run=False,
+    out="foo"
 ):
     base = get_base_values() if use_base else ""
     api_versions = get_api_versions() if use_apiversions else ""
@@ -127,12 +138,16 @@ def run_template(
         "."
     )
 
+    if dry_run:
+        print(f"Dry run: {helm_template_cmd}")
+        return
+
     try:
         result = subprocess.run(
             helm_template_cmd.split(), check=True, capture_output=True, text=True
         )
     except subprocess.CalledProcessError as cpe:
-        print(cpe)
+        print(f"{cpe}\nCmd:\n{helm_template_cmd}\nStderr:\n{cpe.stderr}")
         sys.exit(1)
 
     with open(out, mode="w") as f:
@@ -153,6 +168,7 @@ def main():
         use_base=args.base,
         use_apiversions=args.av,
         additional_values=args.vfile,
+        dry_run=args.dry_run,
         out=args.output,
     )
 
