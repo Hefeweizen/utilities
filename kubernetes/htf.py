@@ -50,6 +50,14 @@ def parse_args():
     )
 
     p.add_argument(
+        "-n",
+        "--no-chart",
+        dest="update_chart",
+        action="store_false",
+        help="do not translate chartmuseum.chartmuseum.svc.cluster.local:8080 into chartmuseum.shared-services.triumphpay.io",
+    )
+
+    p.add_argument(
         "-d",
         "--dry-run",
         action="store_true",
@@ -105,6 +113,30 @@ def get_api_versions():
     found = ",".join(result.stdout.strip().split("\n"))
 
     return f"--api-versions {found}"
+
+
+def update_chartyaml(before, after):
+    with open('Chart.yaml', 'r') as file:
+        filedata = file.read()
+
+    filedata = filedata.replace(before, after)
+
+    with open('Chart.yaml', 'w') as file:
+        file.write(filedata)
+
+
+def update_chartmuseum_reference():
+    update_chartyaml(
+            'chartmuseum.chartmuseum.svc.cluster.local:8080',
+            'chartmuseum.shared-services.triumphpay.io'
+            )
+
+
+def undo_chartmuseum_reference():
+    update_chartyaml(
+            'chartmuseum.shared-services.triumphpay.io',
+            'chartmuseum.chartmuseum.svc.cluster.local:8080'
+            )
 
 
 def helm_dependency_build():
@@ -163,6 +195,9 @@ def main():
         # we've done everything we wanted
         sys.exit()
 
+    if args.update_chart:
+        update_chartmuseum_reference()
+
     helm_dependency_build()
     run_template(
         use_base=args.base,
@@ -171,6 +206,9 @@ def main():
         dry_run=args.dry_run,
         out=args.output,
     )
+
+    if args.update_chart:
+        undo_chartmuseum_reference()
 
 
 if __name__ == "__main__":
