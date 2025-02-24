@@ -14,7 +14,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-PARALLEL_BIN=/opt/homebrew/Cellar/parallel/20230822/bin/parallel
+PARALLEL_BIN="/opt/homebrew/Cellar/parallel/20240722/bin/parallel"
 
 repo_has_remotes() {
     local target=$1
@@ -55,22 +55,26 @@ git_pull() {
 update_repo() {
     local repo_path=$1
 
-    repo_has_remotes $repo_path || return 0
+    (
+        cd ${repo_path}
 
-    fetch_output=$(git_fetch ${repo_path})
+        repo_has_remotes $repo_path || return 0
 
-    if [[ "$fetch_output" != "" ]]
-    then
-        # found something to fetch
-        echo "Processing ${repo_path}:"
-        echo "${fetch_output}"
+        fetch_output=$(git_fetch ${repo_path})
 
-        if $(on_branch_master ${repo_path})
+        if [[ "$fetch_output" != "" ]]
         then
-            # try to update master
-            $(git_pull ${repo_path}) &
+            # found something to fetch
+            echo "Processing ${repo_path}:"
+            echo "${fetch_output}"
+
+            if $(on_branch_master ${repo_path})
+            then
+                # try to update master
+                $(git_pull ${repo_path}) &
+            fi
         fi
-    fi
+    )
 }
 
 main() {
