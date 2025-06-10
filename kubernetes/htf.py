@@ -39,7 +39,15 @@ def parse_args():
         "-o",
         "--output",
         default="foo",
-        help="the name for the output file, app name and namespace",
+        help="the name for the output file",
+    )
+
+    p.add_argument(
+        "-on",
+        "--output-name",
+        default="foo",
+        dest="output_name",
+        help="the name for the app name and namespace",
     )
 
     p.add_argument(
@@ -152,6 +160,7 @@ def run_template(
     use_apiversions=False,
     additional_values=None,
     dry_run=False,
+    output_name="foo",
     out="foo"
 ):
     base = get_base_values() if use_base else ""
@@ -161,8 +170,8 @@ def run_template(
     helm_template_cmd = (
         "helm template "
         "--debug "
-        f"--name-template {out} "
-        f"--namespace {out} "
+        f"--name-template {output_name} "
+        f"--namespace {output_name} "
         f"{api_versions} "
         f"{base} "
         f"--values values.yaml "
@@ -204,6 +213,7 @@ def main():
         use_apiversions=args.av,
         additional_values=args.vfile,
         dry_run=args.dry_run,
+        output_name=args.output_name,
         out=args.output,
     )
 
