@@ -36,18 +36,10 @@ def parse_args():
     )
 
     p.add_argument(
-        "-o",
-        "--output",
-        default="foo",
-        help="the name for the output file",
-    )
-
-    p.add_argument(
-        "-on",
-        "--output-name",
-        default="foo",
-        dest="output_name",
-        help="the name for the app name and namespace",
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Don't run helm, just show what commands would be run.",
     )
 
     p.add_argument(
@@ -66,10 +58,18 @@ def parse_args():
     )
 
     p.add_argument(
-        "-d",
-        "--dry-run",
-        action="store_true",
-        help="Don't run helm, just show what commands would be run.",
+        "-o",
+        "--output",
+        default="foo",
+        help="the name for the output file",
+    )
+
+    p.add_argument(
+        "-on",
+        "--output-name",
+        default="foo",
+        dest="output_name",
+        help="the name for the app name and namespace",
     )
 
     return p.parse_args()
