@@ -46,7 +46,10 @@ def parse_args():
         "-f",
         "--values-file",
         dest="vfile",
-        help="Provide an additional values file to be applied after the values.yaml in the local directory",
+        action='extend',
+        nargs="+",
+        type=str,
+        help="Provide additional values file to be applied after the values.yaml in the local directory",
     )
 
     p.add_argument(
@@ -158,14 +161,21 @@ def helm_dependency_build():
 def run_template(
     use_base=False,
     use_apiversions=False,
+    default_values="values.yaml",
     additional_values=None,
     dry_run=False,
     output_name="foo",
     out="foo"
 ):
+    if additional_values is None:
+        values_array=[]
+    else:
+        values_array=additional_values
+
     base = get_base_values() if use_base else ""
     api_versions = get_api_versions() if use_apiversions else ""
-    add_values = f"--values {additional_values} " if additional_values else ""
+    values_array.insert(0, default_values)
+    value_files = " ".join(f"--values {f}" for f in values_array)
 
     helm_template_cmd = (
         "helm template "
@@ -174,8 +184,7 @@ def run_template(
         f"--namespace {output_name} "
         f"{api_versions} "
         f"{base} "
-        f"--values values.yaml "
-        f"{add_values}"
+        f"{value_files} "
         "."
     )
 
