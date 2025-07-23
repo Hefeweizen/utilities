@@ -14,6 +14,7 @@ desc
 import argparse
 import re
 
+from pathlib import Path
 from typing import Optional, Tuple
 
 from semver import Version
@@ -86,9 +87,25 @@ def lookup_repo_file(image_name: str) -> str:
     if not, create with bare skeleton
     """
     sanitized_image_name = image_name.replace('/', '-')
-    return(f"repos/{sanitized_image_name}.yaml")
+    repo_file = f"repos/{sanitized_image_name}.yaml"
 
-def add_tag(repo_file, tag):
+    enforce_file(image_name, repo_file)
+
+    return(repo_file)
+
+
+def enforce_file(image_name: str, repo_file: str):
+    filename = Path(repo_file)
+    if not filename.is_file():
+        record = {}
+        record['repo'] = image_name
+        record['tags'] = []
+
+        with open(repo_file, mode='w') as f:
+            yaml.dump(record, f)
+
+
+def add_tag_to_file(repo_file, tag):
     with open(repo_file, mode='r') as f:
         record = yaml.load(f)
 
@@ -108,7 +125,7 @@ def process_image(image: str):
     image_name, tag = parse_image(image)
     repo_file = lookup_repo_file(image_name)
 
-    add_tag(repo_file, tag)
+    add_tag_to_file(repo_file, tag)
 
 
 def main():
