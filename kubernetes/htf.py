@@ -36,6 +36,13 @@ def parse_args():
     )
 
     p.add_argument(
+        "--no-deps",
+        dest="build_deps",
+        action="store_false",
+        help="Skip running helm dependency build.  Though, because of our aggressive clean-up, this is likely needed.",
+    )
+
+    p.add_argument(
         "-d",
         "--dry-run",
         action="store_true",
@@ -216,7 +223,9 @@ def main():
     if args.update_chart:
         update_chartmuseum_reference()
 
-    helm_dependency_build()
+    if args.build_deps:
+        helm_dependency_build()
+
     run_template(
         use_base=args.base,
         use_apiversions=args.av,
