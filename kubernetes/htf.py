@@ -29,8 +29,17 @@ def parse_args():
     )
 
     p.add_argument(
-        "-c",
-        "--clean",
+        "-nc",
+        "--no-clean",
+        dest="need_clean",
+        action="store_false",
+        help="skip cleaning previous fetched charts",
+    )
+
+    p.add_argument(
+        "-co",
+        "--clean-only",
+        dest="clean_only",
         action="store_true",
         help="clean-up previously fetched charts and exit",
     )
@@ -214,9 +223,10 @@ def run_template(
 def main():
     args = parse_args()
 
-    clean_prev_charts()
+    if args.need_clean:
+        clean_prev_charts()
 
-    if args.clean:
+    if args.clean_only:
         # we've done everything we wanted
         sys.exit()
 
