@@ -9,6 +9,13 @@
 
 warning='You are on master/main; if you really want to do this type it out long-wise';
 
+# repos where we can push to any branch, including master/main
+allow_listed_repos=("dotfiles" "utilities")
+
+function current_repo() {
+    git config get remote.origin.url | xargs -I XXX basename -s .git XXX
+}
+
 function current_branch() {
     git symbolic-ref --short HEAD
 }
@@ -17,14 +24,35 @@ function is_git_clean() {
     git status --porcelain=v1 2>/dev/null | wc -l
 }
 
-# check if protected branch
-cb=$(current_branch)
-case $(current_branch) in
-    main)   ;& # fall through; we're the same as master
-    master) echo "${warning}";
-            exit
-            ;;
-esac
+function in_allow_listed_repo() {
+    # return T/F
+    cr=$(current_repo)
+    is_allowed=1 # shell truthiness; default to false
+
+    for element in "${allow_listed_repos[@]}"; do
+        if [[ "$element" == "${cr}" ]]; then
+            is_allowed=0 #shell truthiness -- so, set true
+            break
+        fi
+    done
+
+    return ${is_allowed}
+}
+
+
+if in_allow_listed_repo; then
+    # in an allow-listed repo; do nothing
+    cat /dev/null
+else
+    # not in an allow-listed repo; so
+    # check if protected branch
+    case $(current_branch) in
+        main)   ;& # fall through; we're the same as master
+        master) echo "${warning}";
+                exit
+                ;;
+    esac
+fi
 
 # check if uncommitted files
 if [[ $(is_git_clean) -ne 0 ]]; then
