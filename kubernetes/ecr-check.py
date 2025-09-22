@@ -19,7 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Check if tags exist for ECR container images.')
 
     parser.add_argument(
-        'images', 
+        'images',
         nargs='*', # if 0, assumes list from stdin
         help='A list of images to check, in the format <repo>:<tag>'
     )
@@ -27,8 +27,28 @@ def parse_args():
     return parser.parse_args()
 
 
+def standardize_repo_names(image_list):
+    """
+    our mirrored repos all begin with 'mirror/'; make sure all image strings
+    use that form
+    """
+
+    standardized_list = []
+
+    for image in image_list:
+        if image.startswith('mirror/'):
+            standardized_list.append(image)
+        else:
+            standardized_list.append('mirror/' + image)
+
+    return standardized_list
+
+
 def check_ecr_tags(ecr_client, repository_name, tag):
-    """Checks if a specific tag exists in an ECR repository."""
+    """
+    Checks if a specific tag exists in an ECR repository.
+    """
+
     try:
         response = ecr_client.describe_images(
             repositoryName=repository_name,
@@ -46,6 +66,7 @@ def check_ecr_tags(ecr_client, repository_name, tag):
         # need to fail better if credentials aren't found
         return False
 
+
 def main():
     args = parse_args()
 
@@ -57,17 +78,19 @@ def main():
     else:
         images = args.images
 
+    images = standardize_repo_names(images)
+
     for image_string in images:
         try:
             repository_name, tag = image_string.split(':', 1)
             is_present = check_ecr_tags(ecr_client, repository_name, tag)
-            
+
             if is_present:
-                print(f"✅ Tag '{tag}' is present in repository '{repository_name}'.")
+                print(f"✅ Tag found in repository: '{repository_name}:{tag}'")
             else:
-                print(f"❌ Tag '{tag}' is NOT present in repository '{repository_name}'.")
+                print(f"❌ Tag NOT found in repository: '{repository_name}:{tag}'")
         except ValueError:
             print(f"❌ Invalid format for image string: '{image_string}'. Expected '<repo>:<tag>'.")
-    
+
 if __name__ == "__main__":
     main()
