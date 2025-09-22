@@ -12,9 +12,9 @@ fi
 
 git stash push
 git switch main
-htf --base -o foo.main
+htf --base -a -o foo.main
 git switch -
 git stash pop
-htf --no-clean --no-deps --base -o ${local_foo}
+htf --base -a -o ${local_foo}
 
 diff foo.main  ${local_foo}
