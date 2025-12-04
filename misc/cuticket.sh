@@ -54,4 +54,4 @@ function wrap_custom_id_inurl {
 
 
 TASK_ID=$(create_ticket)
-echo $(wrap_custom_id_inurl $(lookup_custom_id ${TASK_ID}))
+echo $(wrap_custom_id_inurl $(lookup_custom_id ${TASK_ID})) | tee >(pbcopy)
