@@ -50,14 +50,14 @@ def coerce(version: str) -> Tuple[Version, Optional[str]]:
         set to zero to obtain a valid semver version.
 
     :param str version: the version string to convert
-    :return: a tuple with a :class:`Version` instance (or ``None``
+    :return: a tuple with a :class:`Version` instance (or version ``0``
         if it's not a version) and the rest of the string which doesn't
         belong to a basic version.
     :rtype: tuple(:class:`Version` | None, str)
     """
     match = BASEVERSION.search(version)
     if not match:
-        return (None, version)
+        return (Version(0), version)
 
     ver = {
         key: 0 if value is None else value for key, value in match.groupdict().items()
@@ -109,6 +109,7 @@ def add_tag_to_file(repo_file, tag):
     with open(repo_file, mode='r') as f:
         record = yaml.load(f)
 
+    # print(f"{tag=} {type(tag)}")
     if tag not in record['tags']:
         tags = record['tags']
         tags.append(tag)
