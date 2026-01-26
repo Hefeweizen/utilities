@@ -1,0 +1,15 @@
+#!/bin/bash
+
+exclusions='["show-diff", "dependencies"]'
+
+gh pr list \
+    --repo 'HubTran/gitops' \
+    --json labels,reviews,title,url |\
+    jq \
+        -r \
+        --arg nullLabel "-" \
+        --argjson exclusions "${exclusions}" \
+        '.[] | select( [.reviews[] | select( .state == "APPROVED" )] | length > 1 ) | "\(.url)|\([.labels[] | .name] - $exclusions | .[] // $nullLabel)|\(.title)"' |\
+    column -s'|' -t |\
+    sed -e 's/\[DEVOPS-1094\] Update/.../' |\
+    sort -k2 -k1
