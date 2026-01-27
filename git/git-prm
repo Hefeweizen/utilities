@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [[ ${1} =~ ^https://.*/pull/[0-9]+$ ]]; then
+    # complete url provided, pass it all through
+    current_pr="${1}"
+elif [[ ${1} =~ ^[0-9]+$ ]]; then
+    # only number provided; assume current repository
+    current_repo=$(gh repo view --json nameWithOwner -q ".nameWithOwner")
+    current_pr="http://github.com/${current_repo}/pull/${1}"; \
+else
+    # assume two args: repo & num
+    repo=${1}
+    num=${2}
+
+    if [[ ${repo} == */* ]]; then
+        # both org and repo provided e.g. 'Hubtran/gitops'
+        current_pr="http://github.com/${repo}/pull/${num}"; \
+    else
+        # assume org is Hubtran
+        current_pr="http://github.com/Hubtran/${repo}/pull/${num}"; \
+    fi
+
+fi
+
+echo "Operating on PR: ${current_pr}"
+
+gh pr merge ${current_pr} --auto -r -d; \
+gh pr update-branch ${current_pr} --rebase; \
