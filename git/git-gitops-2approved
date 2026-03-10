@@ -3,7 +3,7 @@
 exclusions='["show-diff", "dependencies"]'
 
 gh pr list \
-    --repo 'HubTran/gitops' \
+    --repo 'Engineering-TFIN/gitops' \
     --json labels,reviews,title,url |\
     jq \
         -r \

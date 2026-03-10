@@ -13,11 +13,11 @@ else
     num=${2}
 
     if [[ ${repo} == */* ]]; then
-        # both org and repo provided e.g. 'Hubtran/gitops'
+        # both org and repo provided e.g. 'Engineering-TFIN/gitops'
         current_pr="http://github.com/${repo}/pull/${num}"; \
     else
-        # assume org is Hubtran
-        current_pr="http://github.com/Hubtran/${repo}/pull/${num}"; \
+        # assume org is Engineering-TFIN
+        current_pr="http://github.com/Engineering-TFIN/${repo}/pull/${num}"; \
     fi
 
 fi
