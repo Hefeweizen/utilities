@@ -10,11 +10,11 @@ gh pr list \
         -r \
         --arg nullLabel "-" \
         --argjson exclusions "${exclusions}" \
-        '.[] | "\(.url)|\([.reviews[] | .state])|\([.labels[] | .name] - $exclusions | .[] // $nullLabel)|\(.title)"' |\
+        '.[] | "\(.url)|\( .reviews | group_by(.author.login) | map(sort_by(.submittedAt)) | [.[] | last | .state ] | join("") |select( . != "") // "-" )|\([.labels[] | .name] - $exclusions | .[] // $nullLabel)|\(.title)"' |\
     sort -t'|' -k4 -k3 |\
     sed -E \
-        -e 's/"APPROVED"/✅/g' \
-        -e 's/"CHANGES_REQUESTED"/❌/g' \
-        -e 's/"COMMENTED"/💬/g' \
+        -e 's/APPROVED/✅/g' \
+        -e 's/CHANGES_REQUESTED/❌/g' \
+        -e 's/COMMENTED/💬/g' \
         -e 's/\[DEVOPS-1094\] Update( Helm release)?/.../' |\
     column -s'|' -t
