@@ -1,10 +1,22 @@
 #!/bin/bash
-# acronym: git g[itops] pr l[ist]
+# acronym: git pr l[ist]
+#
+# argument handling is very hackish, switch to python?
+
+if [[ -z ${1} ]]; then
+    # nothing specified, use current
+    repo=$(gh repo view --json nameWithOwner -q ".nameWithOwner")
+else
+    repo="Engineering-TFIN/${1}"
+    shift
+fi
+# any additional args found are passed directly to `gh`
 
 exclusions='["show-diff", "dependencies"]'
 
 gh pr list \
-    --repo 'Engineering-TFIN/gitops' \
+    --repo "${repo}" \
+    "$@" \
     --json labels,reviews,title,url |\
     jq \
         -r \
@@ -16,5 +28,6 @@ gh pr list \
         -e 's/APPROVED/✅/g' \
         -e 's/CHANGES_REQUESTED/❌/g' \
         -e 's/COMMENTED/💬/g' \
+        -e 's/DISMISSED/💨/g' \
         -e 's/\[DEVOPS-1094\] Update( Helm release)?/.../' |\
     column -s'|' -t
